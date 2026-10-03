@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bigg Boss Awam — The People's Oracle</title>
+  <meta name="description" content="Bigg Boss Awam — unofficial AI agent for Bigg Boss votings, ratings, news and trivia. Powered by AwamInfer." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 40'%3E%3Cpath d='M4,20 C14,4 50,4 60,20 C50,36 14,36 4,20 Z' fill='none' stroke='%23d4af37' stroke-width='3'/%3E%3Ccircle cx='32' cy='20' r='8.5' fill='%23b3123f'/%3E%3Ccircle cx='32' cy='20' r='4' fill='%23d4af37'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <!-- ══════════════════ TOP BAR ══════════════════ -->
+  <nav class="topbar">
+    <a class="brand" href="#chat" data-tab="chat">
+      <svg class="eye-logo" viewBox="0 0 64 40" aria-hidden="true">
+        <defs>
+          <radialGradient id="irisGrad" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stop-color="#f2d57e" />
+            <stop offset="55%" stop-color="#d4af37" />
+            <stop offset="100%" stop-color="#b3123f" />
+          </radialGradient>
+        </defs>
+        <g class="eye-lashes" stroke="#d4af37" stroke-width="2" stroke-linecap="round" opacity="0.75">
+          <line x1="32" y1="1.5" x2="32" y2="5.5" />
+          <line x1="19" y1="4" x2="21" y2="7.5" />
+          <line x1="45" y1="4" x2="43" y2="7.5" />
+          <line x1="9" y1="10" x2="12.5" y2="12.5" />
+          <line x1="55" y1="10" x2="51.5" y2="12.5" />
+          <line x1="32" y1="38.5" x2="32" y2="35" />
+        </g>
+        <path class="eye-outline" d="M4,20 C14,4 50,4 60,20 C50,36 14,36 4,20 Z"
+              fill="rgba(212,175,55,0.05)" stroke="#d4af37" stroke-width="2.4" />
+        <circle class="eye-iris" cx="32" cy="20" r="8.4" fill="url(#irisGrad)" />
+        <circle cx="32" cy="20" r="3.1" fill="#0a090d" />
+        <circle cx="34.4" cy="17.6" r="1.15" fill="#fff8e1" opacity="0.9" />
+      </svg>
+      <span class="brand-word">
+        <small>BIGG&nbsp;BOSS</small>
+        <strong>AWAM</strong>
+      </span>
+    </a>
+
+    <div class="nav-links" role="tablist" aria-label="Sections">
+      <button class="nav-link" data-tab="chat" role="tab">Chat</button>
+      <button class="nav-link" data-tab="vote" role="tab">Vote</button>
+      <button class="nav-link" data-tab="leaderboard" role="tab">Leaderboard</button>
+      <button class="nav-link" data-tab="ratings" role="tab">Ratings</button>
+      <button class="nav-link" data-tab="news" role="tab">News</button>
+      <button class="nav-link" data-tab="trivia" role="tab">Trivia</button>
+      <button class="nav-link" data-tab="engine" role="tab">Engine&nbsp;Room</button>
+    </div>
+
+    <div class="status-pill" id="engineStatus" title="Inference engine status">
+      <span class="dot"></span><span id="engineStatusText">Booting…</span>
+    </div>
+  </nav>
+
+  <!-- ══════════════════ HERO ══════════════════ -->
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Unofficial Fan Intelligence · The People's Oracle</p>
+      <h1>The Awam has <em>spoken.</em></h1>
+      <p class="hero-sub">
+        Votes, ratings, khabar and trivia for the legends of the Bigg Boss house —
+        served by <strong>AwamInfer</strong>, an inference engine with a paged KV-cache
+        and an engine room you can actually watch.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn btn-primary" data-tab-jump="chat">Talk to the Oracle</button>
+        <button class="btn btn-ghost" data-tab-jump="vote">Cast Your Vote</button>
+      </div>
+    </div>
+    <div class="ticker" aria-label="Live vote ticker">
+      <div class="ticker-label">LIVE</div>
+      <div class="ticker-viewport"><div class="ticker-track" id="tickerTrack"></div></div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ══════════════════ CHAT ══════════════════ -->
+    <section class="tab-panel" id="panel-chat" role="tabpanel" aria-label="Chat with Awam AI">
+      <div class="panel-head">
+        <h2>Converse with the Oracle</h2>
+        <p>Ask about the ladder, cast a vote, demand khabar, or challenge the trivia vault.</p>
+      </div>
+      <div class="chat-shell">
+        <div class="chat-scroll" id="chatScroll">
+          <div class="chat-messages" id="chatMessages">
+            <div class="bubble ai">
+              <div class="bubble-avatar">
+                <svg viewBox="0 0 64 40" class="bubble-eye" aria-hidden="true">
+                  <path d="M4,20 C14,4 50,4 60,20 C50,36 14,36 4,20 Z" fill="none" stroke="#d4af37" stroke-width="3" />
+                  <circle cx="32" cy="20" r="7.5" fill="#d4af37" /><circle cx="32" cy="20" r="2.8" fill="#0a090d" />
+                </svg>
+              </div>
+              <div class="bubble-body">
+                <div class="bubble-text">Namaste, fandom! I'm <strong>Awam</strong> — the people's oracle for all things Bigg Boss. Strictly unofficial, endlessly opinionated. Ask me anything, or try a chip below.</div>
+                <div class="bubble-meta">AwamInfer · local synthesis</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chips" id="chatChips">
+          <button class="chip" data-fill="Who's leading right now?">Who's leading?</button>
+          <button class="chip" data-fill="Latest khabar">Latest khabar</button>
+          <button class="chip" data-fill="Trivia time">Trivia time</button>
+          <button class="chip" data-fill="Who's the highest rated legend?">Highest rated</button>
+          <button class="chip" data-fill="How's the engine doing?">Engine report</button>
+        </div>
+        <form class="chat-input" id="chatForm" autocomplete="off">
+          <input id="chatInput" type="text" maxlength="2000" placeholder="Ask the oracle… votes, news, trivia, engine gossip" aria-label="Message Awam" />
+          <button class="btn btn-primary" type="submit" id="chatSend">Send</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ══════════════════ VOTE ══════════════════ -->
+    <section class="tab-panel" id="panel-vote" role="tabpanel" aria-label="Vote for contestants">
+      <div class="panel-head">
+        <h2>One Legend. One Vote. 24 Hours.</h2>
+        <p id="voteStatusLine">Loading the ladder…</p>
+      </div>
+      <div class="contestant-grid" id="contestantGrid"></div>
+    </section>
+
+    <!-- ══════════════════ LEADERBOARD ══════════════════ -->
+    <section class="tab-panel" id="panel-leaderboard" role="tabpanel" aria-label="Leaderboard">
+      <div class="panel-head">
+        <h2>The Awam Ladder</h2>
+        <p>Live standings — every vote rewrites this page.</p>
+      </div>
+      <div class="podium" id="podium"></div>
+      <div class="ladder-rows" id="ladderRows"></div>
+    </section>
+
+    <!-- ══════════════════ RATINGS ══════════════════ -->
+    <section class="tab-panel" id="panel-ratings" role="tabpanel" aria-label="Ratings board">
+      <div class="panel-head">
+        <h2>The Ratings Board</h2>
+        <p>Where the fandom judges in stars. Your rating updates instantly.</p>
+      </div>
+      <div class="ratings-list" id="ratingsList"></div>
+    </section>
+
+    <!-- ══════════════════ NEWS ══════════════════ -->
+    <section class="tab-panel" id="panel-news" role="tabpanel" aria-label="Fan feed news">
+      <div class="panel-head">
+        <h2>The Fan Feed</h2>
+        <p>Unofficial khabar from around the Awam house — refreshes from the backend.</p>
+      </div>
+      <div class="news-grid" id="newsGrid"></div>
+    </section>
+
+    <!-- ══════════════════ TRIVIA ══════════════════ -->
+    <section class="tab-panel" id="panel-trivia" role="tabpanel" aria-label="Bigg Boss trivia">
+      <div class="panel-head">
+        <h2>Awam Trivia Gauntlet</h2>
+        <p>Eighteen seasons of history. No lifelines. The eye is watching.</p>
+      </div>
+      <div class="trivia-shell">
+        <div class="trivia-scoreboard" id="triviaScoreboard">
+          <div class="ts-stat"><span class="ts-num" id="tsAnswered">0</span><span class="ts-label">answered</span></div>
+          <div class="ts-stat"><span class="ts-num gold" id="tsCorrect">0</span><span class="ts-label">correct</span></div>
+          <div class="ts-stat"><span class="ts-num" id="tsAccuracy">–</span><span class="ts-label">accuracy</span></div>
+          <button class="btn btn-primary" id="triviaStart">Start Round</button>
+        </div>
+        <div class="trivia-card" id="triviaCard">
+          <div class="trivia-placeholder" id="triviaPlaceholder">
+            <p>Press <strong>Start Round</strong> and the oracle will deal the first question.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════ ENGINE ROOM ══════════════════ -->
+    <section class="tab-panel" id="panel-engine" role="tabpanel" aria-label="Engine room diagnostics">
+      <div class="panel-head">
+        <h2>The Engine Room</h2>
+        <p>AwamInfer live telemetry — device, tuning profiles, paged KV cache, latency and throughput.</p>
+      </div>
+
+      <div class="engine-grid">
+        <div class="engine-card engine-device" id="engineDeviceCard">
+          <div class="engine-card-title">Device</div>
+          <div class="device-badge" id="deviceBadge"><span class="dot"></span><span id="deviceMode">CPU</span></div>
+          <div class="device-name" id="deviceName">—</div>
+          <ul class="device-notes" id="deviceNotes"></ul>
+        </div>
+
+        <div class="engine-card engine-profile">
+          <div class="engine-card-title">PyTorch Tuning Profile</div>
+          <div class="profile-grid" id="profileGrid"></div>
+          <button class="btn btn-gold" id="applyProfile" disabled>Apply Profile</button>
+        </div>
+
+        <div class="engine-card engine-kv">
+          <div class="engine-card-title">Paged KV Cache</div>
+          <div class="gauge-row">
+            <div class="gauge-wrap">
+              <div class="gauge" id="gaugeUtil" style="--p:0"><span class="gauge-value" id="gaugeUtilVal">0%</span></div>
+              <span class="gauge-label">utilisation</span>
+            </div>
+            <div class="gauge-wrap">
+              <div class="gauge" id="gaugeHit" style="--p:0"><span class="gauge-value" id="gaugeHitVal">0%</span></div>
+              <span class="gauge-label">hit rate</span>
+            </div>
+          </div>
+          <div class="kv-stats" id="kvStats"></div>
+        </div>
+
+        <div class="engine-card engine-latency">
+          <div class="engine-card-title">Request Latency</div>
+          <div class="latency-nums" id="latencyNums"></div>
+          <canvas id="sparkline" height="72" aria-label="Recent latency sparkline"></canvas>
+          <div class="spark-caption">recent request latency · ms</div>
+        </div>
+
+        <div class="engine-card engine-throughput">
+          <div class="engine-card-title">Throughput &amp; Service</div>
+          <div class="big-metric"><span class="big-num" id="tpsNum">0</span><span class="big-unit">tokens / sec</span></div>
+          <div class="kv-stats" id="serviceStats"></div>
+        </div>
+
+        <div class="engine-card engine-bench">
+          <div class="engine-card-title">Micro-Benchmarks</div>
+          <p class="bench-hint">Runs attention &amp; matmul kernels on the accelerator when PyTorch + GPU are present; otherwise calibrates the CPU synthesis path.</p>
+          <button class="btn btn-gold" id="runBenchmark">Run Benchmark</button>
+          <div class="bench-result" id="benchResult">No benchmark on record.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="site-footer">
+    <p><strong>Bigg Boss Awam</strong> is an unofficial fan project for entertainment only.
+       Not affiliated with, endorsed by, or connected to Colors TV, Endemol Shine, or Viacom18.
+       Bigg Boss and all related marks belong to their respective owners.</p>
+    <p class="footer-line">Inference by AwamInfer 1.0.0 · ROCm-ready · <span id="footerMode">CPU precision mode</span></p>
+  </footer>
+
+  <div class="toast-root" id="toastRoot" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

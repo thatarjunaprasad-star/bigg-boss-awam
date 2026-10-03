@@ -1,0 +1,11 @@
+# Bigg Boss Awam — backend requirements
+fastapi>=0.110
+uvicorn>=0.29
+
+# PyTorch — powers tuning profiles (matmul precision, SDPA backend selection)
+# and the Engine Room micro-benchmarks. The CPU wheel is enough for that;
+# every feature also works without torch installed.
+#   CPU (this machine):  pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   AMD GPUs (Linux):    pip install torch --index-url https://download.pytorch.org/whl/rocm6.2
+#   AMD GPUs (Windows):  ROCm HIP SDK — https://rocm.docs.amd.com/projects/install-on-windows/en/latest/
+torch
